@@ -1,6 +1,6 @@
 {
     "name": "@jullury-fluent/smart-api-common",
-    "version": "0.0.16",
+    "version": "1.0.0",
     "description": "Common utilities and helpers",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
