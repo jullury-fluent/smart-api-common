@@ -1,104 +1,97 @@
-# @smart-api/common
+# @jullury-fluent/smart-api-common
 
-Shared utilities, DTOs, and helpers used by both client and server packages. Provides the foundation for the Smart Endpoint ecosystem with robust support for nested property filtering and searching.
+Shared utilities, DTOs, and helpers used by both client and server packages. Provides the foundation for the Smart API ecosystem with robust support for nested property filtering and searching.
 
 ## Features
 
 - **Data Transfer Objects (DTOs)**: Standardized data structures for communication between client and server
 - **Helper Functions**: Utility functions for common operations
-- **ORM Utilities**: Tools for working with Sequelize ORM
-- **Dynamic Query Building**: Server-side implementation of the query builder with support for:
+- **Type Definitions**: Shared type definitions for consistent data handling
+- **Zod Extensions**: Extended functionality for Zod schema validation
+- **Dynamic Query Building**: Core components for query building with support for:
   - Nested property filtering with dot notation
   - Case-insensitive string searches
   - Circular reference handling between related entities
-  - Comprehensive Sequelize operator integration
+  - Comprehensive operator integration
 
 ## Installation
 
 ```bash
-npm install @smart-api/common
+npm install @jullury-fluent/smart-api-common
 # or
-yarn add @smart-api/common
+yarn add @jullury-fluent/smart-api-common
 # or
-pnpm add @smart-api/common
+pnpm add @jullury-fluent/smart-api-common
 ```
 
 ## Usage
 
-### DTOs
+### DTOs and Types
 
 ```typescript
-import { PaginationDto, FilterDto, SortDto } from '@smart-api/common';
+import { Order, FilterOperator, FilterItem, SortItem } from '@jullury-fluent/smart-api-common';
 
-// Create a pagination DTO
-const pagination = new PaginationDto();
-pagination.page = 1;
-pagination.pageSize = 25;
+// Use the Order enum for sorting direction
+const sortDirection = Order.ASC;
 
-// Create a filter DTO
-const filter = new FilterDto();
-filter.search = 'john';
-filter.filters = { status: 'active', 'user.role': 'admin' };
+// Create a filter item
+const filter: FilterItem = {
+  field: 'username',
+  operator: FilterOperator.CONTAINS,
+  value: 'john',
+};
 
-// Create a sort DTO
-const sort = new SortDto();
-sort.field = 'createdAt';
-sort.direction = 'DESC';
+// Create a sort item
+const sort: SortItem = {
+  order_by: 'createdAt',
+  order_type: Order.DESC,
+};
 ```
 
 ### Helper Functions
 
 ```typescript
-import { buildWhereClause, searchableFields } from '@smart-api/common';
+import { getPath } from '@jullury-fluent/smart-api-common';
+import { z } from 'zod';
 
-// Build a Sequelize where clause from a filter object
-const whereClause = buildWhereClause({
-  model: UserModel,
-  clientFilter: { status: 'active', 'user.role': 'admin' },
-  search: 'john',
+// Define a Zod schema
+const UserSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  email: z.string().email(),
+  profile: z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+  }),
 });
 
-// Get searchable fields from a Sequelize model
-const fields = searchableFields(UserModel);
-```
-
-### ORM Utilities
-
-```typescript
-import { createSequelizeInclude } from '@smart-api/common';
-
-// Create a Sequelize include object for nested relations
-const include = createSequelizeInclude(UserModel, ['company', 'profile']);
+// Get the path structure from a Zod schema
+const paths = getPath(UserSchema);
+// Result: ['id', 'username', 'email', 'profile.firstName', 'profile.lastName']
 ```
 
 ## Key Components
 
-### Dynamic Query Building
+### Enums and Constants
 
-The common package provides server-side implementations for building dynamic queries with Sequelize:
+- `Order`: Enum for sort direction (ASC, DESC)
+- `FilterOperator`: Enum for filter operations (eq, neq, gt, lt, contains, etc.)
+- `TimeUnit`: Enum for time units in time series analytics
 
-- `buildWhereClause`: Constructs Sequelize WHERE conditions from client filters and search terms
-- `buildAdditionalFilters`: Transforms client filter values to use appropriate Sequelize operators
-- `buildSearchQuery`: Creates full-text search conditions across multiple fields
-- `searchNestedFields`: Handles searching across related entities with proper handling for circular references
+### Types
 
-### Nested Property Support
+- `FilterItem`: Interface for filter conditions
+- `SortItem`: Interface for sort conditions
+- `PaginationOptions`: Interface for pagination parameters
+- `QueryOptions`: Interface combining pagination, filtering, and sorting
 
-The package includes robust support for working with nested properties in filters and searches:
+### Zod Extensions
 
-- Dot notation for accessing nested properties (e.g., `user.profile.role`)
-- Proper handling of circular references between related entities
-- Support for various relationship types (1:1, 1:Many, Many:Many)
+The package includes extensions for Zod to support advanced validation and schema introspection:
 
-## Testing
-
-```bash
-npm test
-# or
-yarn test
-# or
-pnpm test
-```
+- Path extraction from Zod schemas
+- Nested property access with dot notation
+- Schema metadata for improved API documentation
 
 ## License
 
